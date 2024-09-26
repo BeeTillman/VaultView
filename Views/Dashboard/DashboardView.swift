@@ -1,7 +1,6 @@
 // DashboardView.swift
 
 import SwiftUI
-import Charts
 
 struct DashboardView: View {
     @EnvironmentObject var accountVM: AccountViewModel
@@ -38,11 +37,16 @@ struct DashboardView: View {
 
                     // Net Worth Chart
                     NetWorthChartView(accounts: accountVM.accounts)
-                        .padding()
-                        .background(Theme.cardColor)
-                        .cornerRadius(15)
-                        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
-                        .padding(.horizontal)
+                        .environmentObject(accountVM)
+
+                    // Two Smaller Charts/Cards
+                    HStack {
+                        AverageMonthlyChangeChartView(accounts: accountVM.accounts)
+                            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+                        CurrentMonthChangeCardView(accounts: accountVM.accounts)
+                            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+                    }
+                    .padding(.horizontal)
 
                     // Recent Accounts
                     VStack(alignment: .leading, spacing: 10) {

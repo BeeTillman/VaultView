@@ -25,7 +25,7 @@ struct NetWorthChartView: View {
     var netWorthData: [BalanceEntry] {
         // Step 1: Determine the start and end dates based on the selected time frame
         let calendar = Calendar.current
-        let today = Date()
+        let today = calendar.startOfDay(for: Date())
 
         var startDate: Date
         var intervalComponent: Calendar.Component
@@ -33,36 +33,44 @@ struct NetWorthChartView: View {
 
         switch selectedTimeFrame {
         case .allTime:
-            // Start from the date the user created their account
-            if let accountCreationDate = accounts.flatMap({ $0.balances }).map({ $0.date }).min() {
-                startDate = calendar.startOfDay(for: accountCreationDate)
+            // Start from the earliest balance entry date
+            if let earliestDate = accounts.flatMap({ $0.balances }).map({ $0.date }).min() {
+                startDate = calendar.startOfDay(for: earliestDate)
             } else {
-                startDate = calendar.startOfDay(for: today)
+                startDate = today
             }
             intervalComponent = .day
             intervalValue = 1
         case .pastThreeYears:
             startDate = calendar.date(byAdding: .year, value: -3, to: today) ?? today
-            startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: startDate)) ?? startDate
+            startDate = calendar.startOfDay(for: startDate)
             intervalComponent = .month
             intervalValue = 1
         case .yearToDate:
             startDate = calendar.date(from: DateComponents(year: calendar.component(.year, from: today), month: 1, day: 1)) ?? today
+            startDate = calendar.startOfDay(for: startDate)
             intervalComponent = .weekOfYear
             intervalValue = 1
         case .month:
             startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
+            startDate = calendar.startOfDay(for: startDate)
             intervalComponent = .day
             intervalValue = 1
         case .week:
             let weekday = calendar.component(.weekday, from: today)
             let daysToSubtract = weekday - calendar.firstWeekday
             startDate = calendar.date(byAdding: .day, value: -daysToSubtract, to: today) ?? today
+            startDate = calendar.startOfDay(for: startDate)
             intervalComponent = .day
             intervalValue = 1
         }
 
-        let endDate = calendar.startOfDay(for: today)
+        // Ensure startDate is not after today
+        if startDate > today {
+            startDate = today
+        }
+
+        let endDate = today
 
         // Step 2: Generate dates at the specified intervals
         var dates: [Date] = []
@@ -80,6 +88,7 @@ struct NetWorthChartView: View {
         // Step 3: Build the net worth data for each date
         var netWorthData: [BalanceEntry] = []
         var lastKnownBalances: [UUID: Double] = [:]
+        var lastTotalNetWorth: Double = 0.0
 
         for date in dates {
             var totalNetWorth: Double = 0.0
@@ -87,16 +96,27 @@ struct NetWorthChartView: View {
             for account in accounts {
                 // Get the latest balance for this account up to the current date
                 if let latestBalance = account.balances
-                    .filter({ $0.date <= date })
+                    .filter({ calendar.startOfDay(for: $0.date) <= date })
                     .sorted(by: { $0.date < $1.date })
                     .last {
                     lastKnownBalances[account.id] = latestBalance.amount
                 }
-                // Use the latest known balance or default to 0
+                // Use the latest known balance or default to earliest known balance
                 let accountBalance = lastKnownBalances[account.id] ?? 0.0
                 totalNetWorth += accountBalance
             }
 
+            // If totalNetWorth is zero and we have a previous value, use the last known net worth
+            if totalNetWorth == 0.0 && lastTotalNetWorth != 0.0 {
+                totalNetWorth = lastTotalNetWorth
+            }
+
+            // If totalNetWorth is still zero, use the earliest known net worth
+            if totalNetWorth == 0.0, let earliestNetWorth = accounts.flatMap({ $0.balances }).map({ $0.amount }).min() {
+                totalNetWorth = earliestNetWorth
+            }
+
+            lastTotalNetWorth = totalNetWorth
             netWorthData.append(BalanceEntry(id: UUID(), date: date, amount: totalNetWorth))
         }
 
@@ -162,7 +182,7 @@ struct NetWorthChartView: View {
                                            let tooltipYPosition = proxy.position(forY: closestEntry.amount) {
 
                                             // Only trigger haptic feedback and update if the data point has changed
-                                            if closestEntry.id != selectedDataPoint?.id {
+                                            if closestEntry.date != selectedDataPoint?.date {
                                                 DispatchQueue.main.async {
                                                     selectedDataPoint = closestEntry
                                                     tooltipPosition = CGPoint(x: tooltipXPosition, y: tooltipYPosition - 70)
@@ -228,7 +248,7 @@ struct NetWorthChartView: View {
     private var xAxisStrideCount: Int {
         switch selectedTimeFrame {
         case .pastThreeYears:
-            return 3
+            return 6 // Stride every 6 months
         case .yearToDate:
             return 1
         case .month:
@@ -244,7 +264,9 @@ struct NetWorthChartView: View {
     private func formattedAxisLabel(for date: Date) -> String {
         switch selectedTimeFrame {
         case .pastThreeYears:
-            return date.formatted(.dateTime.year().month())
+            return date.formatted(Date.FormatStyle()
+                                    .month(.twoDigits)
+                                    .year(.twoDigits))
         case .yearToDate, .month:
             return date.formatted(.dateTime.month(.abbreviated).day())
         case .week:

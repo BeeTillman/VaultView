@@ -82,6 +82,8 @@
 				Settings/SettingsView.swift,
 				Shared/FloatingActionButton.swift,
 				Shared/SelectAccountView.swift,
+				Shared/TimeFrameSelectionView.swift,
+				Shared/TooltipView.swift,
 				Stocks/AddStockView.swift,
 				Stocks/StockDetailView.swift,
 				Stocks/StocksView.swift,

@@ -33,22 +33,21 @@ struct CurrentMonthChangeCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Net Worth Change This Month")
+        VStack {
+            Text("Change This Month")
                 .font(.headline)
-                .padding(.horizontal)
+                .foregroundColor(Theme.textColor)
+                .padding(.top, 8)
+                .multilineTextAlignment(.center)
+
+            Spacer()
 
             Text("$\(currentMonthChange, specifier: "%.2f")")
                 .font(.largeTitle)
                 .foregroundColor(currentMonthChange >= 0 ? .green : .red)
-                .padding(.horizontal)
+                .padding()
 
             Spacer()
         }
-        .frame(height: 150)
-        .background(Theme.cardColor)
-        .cornerRadius(15)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
-        .padding()
     }
 }

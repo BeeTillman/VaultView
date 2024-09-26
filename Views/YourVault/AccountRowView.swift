@@ -7,6 +7,7 @@ struct AccountRowView: View {
 
     var body: some View {
         HStack {
+            // Icon
             if let iconName = account.iconName {
                 Image(iconName)
                     .resizable()
@@ -18,15 +19,22 @@ struct AccountRowView: View {
                     .frame(width: 40, height: 30)
                     .foregroundColor(Theme.accentColor)
             }
-            VStack(alignment: .leading) {
+
+            // Account Name and Subtitle
+            VStack(alignment: .leading, spacing: 2) {
                 Text(account.name)
                     .font(.custom(Theme.fontName, size: 18))
                     .foregroundColor(Theme.textColor)
+                    .baselineOffset(4) // Slightly raised
+
                 Text(account.type.rawValue.capitalized)
                     .font(.custom(Theme.fontName, size: 14))
                     .foregroundColor(Theme.secondaryTextColor)
             }
+
             Spacer()
+
+            // Account Balance
             if let latestBalance = account.balances.max(by: { $0.date < $1.date }) {
                 Text("$\(latestBalance.amount, specifier: "%.2f")")
                     .font(.custom(Theme.boldFontName, size: 18))

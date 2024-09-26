@@ -1,9 +1,9 @@
-// AverageMonthlyChangeChartView.swift
+// AverageMonthlyChangeCardView.swift
 
 import SwiftUI
 import Charts
 
-struct AverageMonthlyChangeChartView: View {
+struct AverageMonthlyChangeCardView: View {
     var accounts: [Account]
 
     var monthlyChangeData: [MonthlyChange] {
@@ -45,14 +45,19 @@ struct AverageMonthlyChangeChartView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Average Monthly Net Worth Change")
+        VStack {
+            Text("Avg. Monthly Change")
                 .font(.headline)
-                .padding(.horizontal)
+                .foregroundColor(Theme.textColor)
+                .padding(.top, 8)
+                .multilineTextAlignment(.center)
+
+            Spacer()
 
             if monthlyChangeData.isEmpty {
                 Text("No data available.")
-                    .padding()
+                    .font(.caption)
+                    .foregroundColor(Theme.secondaryTextColor)
             } else {
                 Chart(monthlyChangeData) { dataPoint in
                     BarMark(
@@ -61,14 +66,13 @@ struct AverageMonthlyChangeChartView: View {
                     )
                     .foregroundStyle(dataPoint.change >= 0 ? .green : .red)
                 }
-                .frame(height: 200)
-                .padding()
+                .chartXAxis(.hidden)
+                .chartYAxis(.hidden)
+                .padding([.leading, .trailing, .bottom], 8)
             }
+
+            Spacer()
         }
-        .background(Theme.cardColor)
-        .cornerRadius(15)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
-        .padding()
     }
 }
 

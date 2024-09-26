@@ -39,12 +39,21 @@ struct DashboardView: View {
                     NetWorthChartView(accounts: accountVM.accounts)
                         .environmentObject(accountVM)
 
-                    // Two Smaller Charts/Cards
-                    HStack {
-                        AverageMonthlyChangeChartView(accounts: accountVM.accounts)
-                            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+                    // Two Smaller Cards
+                    HStack(spacing: 16) {
+                        // Average Monthly Net Worth Change Card
+                        AverageMonthlyChangeCardView(accounts: accountVM.accounts)
+                            .frame(width: (UIScreen.main.bounds.width - 48) / 2, height: (UIScreen.main.bounds.width - 48) / 2)
+                            .background(Theme.cardColor)
+                            .cornerRadius(15)
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
+
+                        // Current Month Net Worth Change Card
                         CurrentMonthChangeCardView(accounts: accountVM.accounts)
-                            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+                            .frame(width: (UIScreen.main.bounds.width - 48) / 2, height: (UIScreen.main.bounds.width - 48) / 2)
+                            .background(Theme.cardColor)
+                            .cornerRadius(15)
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
                     }
                     .padding(.horizontal)
 

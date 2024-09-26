@@ -78,6 +78,8 @@
 				Dashboard/NetWorthChartView.swift,
 				Settings/AppIconPickerView.swift,
 				Settings/SettingsView.swift,
+				Shared/FloatingActionButton.swift,
+				Shared/SelectAccountView.swift,
 				Stocks/AddStockView.swift,
 				Stocks/StockDetailView.swift,
 				Stocks/StocksView.swift,

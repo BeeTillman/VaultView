@@ -47,6 +47,28 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             }
         }
     }
+    
+    func scheduleDebugNotification() {
+        // Remove existing debug notifications
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["debugNotification"])
+
+        let content = UNMutableNotificationContent()
+        content.title = "Debug Notification"
+        content.body = "This is a test notification."
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+
+        let request = UNNotificationRequest(identifier: "debugNotification", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling debug notification: \(error.localizedDescription)")
+            } else {
+                print("Debug notification scheduled.")
+            }
+        }
+    }
 
     // Handle notifications while the app is in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,

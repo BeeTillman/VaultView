@@ -3,13 +3,13 @@
 import SwiftUI
 
 struct Theme {
-    static let primaryColor = Color("PrimaryColor") // Define in Assets.xcassets
-    static let secondaryColor = Color("SecondaryColor") // Define in Assets.xcassets
-    static let backgroundColor = Color("BackgroundColor") // Define in Assets.xcassets
-    static let accentColor = Color("AccentColor") // Define in Assets.xcassets
-    static let textColor = Color("TextColor") // Define in Assets.xcassets
-    static let secondaryTextColor = Color("SecondaryTextColor") // Define in Assets.xcassets
-    static let cardColor = Color("CardColor") // Define in Assets.xcassets
-    static let fontName = "Montserrat-Regular" // Add Montserrat font files to project
+    static let primaryColor = Color("PrimaryColor") // Update in Assets.xcassets
+    static let secondaryColor = Color("SecondaryColor") // Update in Assets.xcassets
+    static let backgroundColor = Color("BackgroundColor") // Update in Assets.xcassets
+    static let accentColor = Color("AccentColor") // Update in Assets.xcassets
+    static let textColor = Color("TextColor") // Update in Assets.xcassets
+    static let secondaryTextColor = Color("SecondaryTextColor") // Update in Assets.xcassets
+    static let cardColor = Color("CardColor") // Update in Assets.xcassets
+    static let fontName = "Montserrat-Regular" // Ensure fonts are added
     static let boldFontName = "Montserrat-Bold"
 }

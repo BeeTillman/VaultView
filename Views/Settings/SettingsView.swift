@@ -20,6 +20,12 @@ struct SettingsView: View {
                     .onChange(of: notificationFrequency) { newValue in
                         NotificationManager.shared.scheduleNotification(frequency: newValue)
                     }
+
+                    Button(action: {
+                        NotificationManager.shared.scheduleDebugNotification()
+                    }) {
+                        Text("Debug Notification")
+                    }
                 }
 
                 // Account Section

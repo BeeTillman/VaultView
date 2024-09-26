@@ -6,7 +6,7 @@ class AccountViewModel: ObservableObject {
     @Published var accounts: [Account] = []
     var ownerId: String
     private var db = Firestore.firestore()
-    
+
     init(ownerId: String) {
         self.ownerId = ownerId
         loadAccounts()
@@ -43,6 +43,18 @@ class AccountViewModel: ObservableObject {
             self.accounts = snapshot?.documents.compactMap { document in
                 try? document.data(as: Account.self)
             } ?? []
+        }
+    }
+    
+    func deleteAccount(_ account: Account) {
+        db.collection("accounts").document(account.id.uuidString).delete { error in
+            if let error = error {
+                print("Error deleting account: \(error)")
+            } else {
+                DispatchQueue.main.async {
+                    self.accounts.removeAll { $0.id == account.id }
+                }
+            }
         }
     }
 }

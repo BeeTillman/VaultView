@@ -52,7 +52,9 @@ struct DashboardView: View {
                             .padding(.horizontal)
 
                         ForEach(accountVM.accounts) { account in
-                            AccountRowView(account: account)
+                            NavigationLink(destination: AccountDetailView(account: account).environmentObject(accountVM)) {
+                                AccountRowView(account: account)
+                            }
                         }
                     }
 

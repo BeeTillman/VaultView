@@ -40,7 +40,7 @@ struct AddBalanceEntryView: View {
             return
         }
 
-        let newBalanceEntry = BalanceEntry(date: date, amount: balanceAmount)
+        let newBalanceEntry = BalanceEntry(id: UUID(), date: date, amount: balanceAmount)
         var updatedAccount = account
         updatedAccount.balances.append(newBalanceEntry)
         accountVM.updateAccount(updatedAccount)

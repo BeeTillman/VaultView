@@ -82,6 +82,7 @@
 				Stocks/StockDetailView.swift,
 				Stocks/StocksView.swift,
 				YourVault/AccountDetailView.swift,
+				YourVault/AccountRowView.swift,
 				YourVault/AddAccountView.swift,
 				YourVault/AddBalanceEntryView.swift,
 				YourVault/AddBalanceView.swift,

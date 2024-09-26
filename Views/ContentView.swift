@@ -1,3 +1,5 @@
+// ContentView.swift
+
 import SwiftUI
 import FirebaseAuth
 
@@ -18,19 +20,19 @@ struct ContentView: View {
                 .environmentObject(accountVM)
                 .environmentObject(stockVM)
                 .tabItem {
-                    Label("Dashboard", systemImage: "chart.bar.fill")
+                    Label("Dashboard", systemImage: "house.fill")
                 }
 
             YourVaultView()
                 .environmentObject(accountVM)
                 .tabItem {
-                    Label("Your Vault", systemImage: "lock.shield")
+                    Label("Accounts", systemImage: "wallet.pass.fill")
                 }
 
             StocksView()
                 .environmentObject(stockVM)
                 .tabItem {
-                    Label("Stocks", systemImage: "chart.line.uptrend.xyaxis")
+                    Label("Investments", systemImage: "chart.line.uptrend.xyaxis")
                 }
 
             SettingsView()
@@ -39,5 +41,6 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
         }
+        .accentColor(Theme.accentColor)
     }
 }

@@ -1,3 +1,5 @@
+// NetWorthChartView.swift
+
 import SwiftUI
 import Charts
 
@@ -5,17 +7,33 @@ struct NetWorthChartView: View {
     var accounts: [Account]
 
     var netWorthData: [BalanceEntry] {
-        // Aggregate balances across all accounts by date
-        var dataDict: [Date: Double] = [:]
-        for account in accounts {
-            for balance in account.balances {
-                let dateKey = Calendar.current.startOfDay(for: balance.date)
-                dataDict[dateKey, default: 0.0] += balance.amount
+        // Collect all unique dates from balance entries
+        let allDates = Set(accounts.flatMap { $0.balances.map { Calendar.current.startOfDay(for: $0.date) } })
+        let sortedDates = allDates.sorted()
+
+        var netWorthData: [BalanceEntry] = []
+        var accountLatestBalances: [UUID: Double] = [:] // Account ID to latest balance up to the current date
+
+        for date in sortedDates {
+            var totalNetWorth: Double = 0.0
+
+            for account in accounts {
+                // Get the latest balance for this account up to the current date
+                if let latestBalance = account.balances
+                    .filter({ $0.date <= date })
+                    .sorted(by: { $0.date < $1.date })
+                    .last {
+                    accountLatestBalances[account.id] = latestBalance.amount
+                }
+                // Use the latest balance or default to 0
+                let accountBalance = accountLatestBalances[account.id] ?? 0.0
+                totalNetWorth += accountBalance
             }
+
+            netWorthData.append(BalanceEntry(id: UUID(), date: date, amount: totalNetWorth))
         }
-        let sortedData = dataDict.map { BalanceEntry(date: $0.key, amount: $0.value) }
-            .sorted { $0.date < $1.date }
-        return sortedData
+
+        return netWorthData.sorted(by: { $0.date < $1.date })
     }
 
     var body: some View {

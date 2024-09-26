@@ -1,7 +1,7 @@
 import Foundation
 
 struct BalanceEntry: Identifiable, Codable {
-    let id: UUID = UUID()
+    let id: UUID
     var date: Date
     var amount: Double
 }

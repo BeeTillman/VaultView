@@ -1,3 +1,5 @@
+// AddAccountView.swift
+
 import SwiftUI
 
 struct AddAccountView: View {
@@ -18,8 +20,9 @@ struct AddAccountView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Account Information")) {
+                Section(header: Text("Account Information").font(.custom(Theme.fontName, size: 16))) {
                     TextField("Account Name", text: $name)
+                        .font(.custom(Theme.fontName, size: 16))
                     Picker("Account Type", selection: $type) {
                         ForEach(AccountType.allCases) { accountType in
                             Text(accountType.rawValue.capitalized).tag(accountType)
@@ -45,9 +48,10 @@ struct AddAccountView: View {
                     }
                 }
 
-                Section(header: Text("Initial Balance")) {
+                Section(header: Text("Initial Balance").font(.custom(Theme.fontName, size: 16))) {
                     TextField("Balance Amount", text: $initialBalance)
                         .keyboardType(.decimalPad)
+                        .font(.custom(Theme.fontName, size: 16))
                 }
 
                 Button(action: {
@@ -56,6 +60,12 @@ struct AddAccountView: View {
                     Text("Add Account")
                         .frame(maxWidth: .infinity)
                 }
+                .font(.custom(Theme.boldFontName, size: 18))
+                .foregroundColor(.white)
+                .padding()
+                .background(Theme.accentColor)
+                .cornerRadius(10)
+                .padding(.horizontal)
             }
             .navigationTitle("Add Account")
             .sheet(isPresented: $showIconPicker) {
@@ -74,9 +84,10 @@ struct AddAccountView: View {
             return
         }
 
-        let newBalanceEntry = BalanceEntry(date: Date(), amount: balance)
+        let newBalanceEntry = BalanceEntry(id: UUID(), date: Date(), amount: balance)
 
         let newAccount = Account(
+            id: UUID(),
             name: name,
             type: type,
             iconName: selectedIcon,

@@ -11,7 +11,7 @@ enum AccountType: String, CaseIterable, Identifiable, Codable {
 }
 
 struct Account: Identifiable, Codable {
-    let id: UUID = UUID()
+    let id: UUID
     var name: String
     var type: AccountType
     var iconName: String? // Optional icon image name

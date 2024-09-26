@@ -1,65 +1,68 @@
+// DashboardView.swift
+
 import SwiftUI
 import Charts
 
 struct DashboardView: View {
     @EnvironmentObject var accountVM: AccountViewModel
 
+    var totalNetWorth: Double {
+        accountVM.accounts.reduce(0) { total, account in
+            if let latestBalance = account.balances.max(by: { $0.date < $1.date }) {
+                return total + latestBalance.amount
+            } else {
+                return total
+            }
+        }
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
-                // Net Worth Chart
-                NetWorthChartView(accounts: accountVM.accounts)
+                VStack(spacing: 20) {
+                    // Total Net Worth Card
+                    VStack(alignment: .leading) {
+                        Text("Total Net Worth")
+                            .font(.custom(Theme.fontName, size: 18))
+                            .foregroundColor(Theme.secondaryTextColor)
+                        Text("$\(totalNetWorth, specifier: "%.2f")")
+                            .font(.custom(Theme.boldFontName, size: 36))
+                            .foregroundColor(Theme.textColor)
+                    }
                     .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Theme.cardColor)
-                    .cornerRadius(10)
+                    .cornerRadius(15)
+                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
                     .padding(.horizontal)
 
-                // Summary of Accounts
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Account Summary")
-                        .font(.headline)
-                        .foregroundColor(Theme.textColor)
-                        .padding(.horizontal)
-
-                    ForEach(accountVM.accounts) { account in
-                        HStack {
-                            if let iconName = account.iconName {
-                                Image(iconName)
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(Circle())
-                            }
-                            VStack(alignment: .leading) {
-                                Text(account.name)
-                                    .font(.system(size: 18, weight: .medium, design: .default))
-                                    .foregroundColor(Theme.textColor)
-                                Text(account.type.rawValue.capitalized)
-                                    .font(.system(size: 14, weight: .regular, design: .default))
-                                    .foregroundColor(Theme.secondaryTextColor)
-                            }
-                            Spacer()
-                            if let latestBalance = account.balances.max(by: { $0.date < $1.date }) {
-                                Text("$\(latestBalance.amount, specifier: "%.2f")")
-                                    .font(.system(size: 18, weight: .bold, design: .default))
-                                    .foregroundColor(Theme.textColor)
-                            } else {
-                                Text("$0.00")
-                                    .font(.system(size: 18, weight: .bold, design: .default))
-                                    .foregroundColor(Theme.textColor)
-                            }
-                        }
+                    // Net Worth Chart
+                    NetWorthChartView(accounts: accountVM.accounts)
                         .padding()
                         .background(Theme.cardColor)
-                        .cornerRadius(10)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 5)
                         .padding(.horizontal)
-                    }
-                }
 
-                Spacer()
+                    // Recent Accounts
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Accounts")
+                            .font(.custom(Theme.fontName, size: 22))
+                            .foregroundColor(Theme.textColor)
+                            .padding(.horizontal)
+
+                        ForEach(accountVM.accounts) { account in
+                            AccountRowView(account: account)
+                        }
+                    }
+
+                    Spacer()
+                }
+                .padding(.top)
             }
-            .background(Theme.backgroundColor)
+            .background(Theme.backgroundColor.edgesIgnoringSafeArea(.all))
             .navigationTitle("Dashboard")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
         }
     }
 }

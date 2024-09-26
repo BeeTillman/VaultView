@@ -124,104 +124,131 @@ struct NetWorthChartView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Net Worth")
-                .font(.headline)
-                .padding(.horizontal)
+        VStack(alignment: .center) {
+            // Title and Subtitle
+            VStack(spacing: 2) {
+                Text("Net Worth")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Theme.textColor)
+                Text(subtitleText)
+                    .font(.subheadline)
+                    .foregroundColor(Theme.secondaryTextColor)
+            }
+            .padding(.top)
 
-            if netWorthData.isEmpty {
-                Text("No data available.")
-                    .padding()
-            } else {
-                Chart {
-                    ForEach(netWorthData) { dataPoint in
-                        LineMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Net Worth", dataPoint.amount)
-                        )
-                        .interpolationMethod(.catmullRom)
-                        .foregroundStyle(Theme.accentColor)
-
-                        // Dot marker using PointMark
-                        if selectedDataPoint?.date == dataPoint.date {
-                            PointMark(
+            // Total Net Worth in the upper left corner of the chart
+            ZStack(alignment: .topLeading) {
+                // Chart
+                if netWorthData.isEmpty {
+                    Text("No data available.")
+                        .padding()
+                } else {
+                    Chart {
+                        ForEach(netWorthData) { dataPoint in
+                            LineMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Net Worth", dataPoint.amount)
                             )
-                            .symbolSize(16)
+                            .interpolationMethod(.catmullRom)
                             .foregroundStyle(Theme.accentColor)
-                            .annotation(position: .overlay) {
-                                Circle()
-                                    .strokeBorder(Theme.accentColor, lineWidth: 2)
-                                    .background(Circle().fill(Theme.accentColor.opacity(0.2)))
-                                    .frame(width: 16, height: 16)
+
+                            // Dot marker using PointMark
+                            if selectedDataPoint?.date == dataPoint.date {
+                                PointMark(
+                                    x: .value("Date", dataPoint.date),
+                                    y: .value("Net Worth", dataPoint.amount)
+                                )
+                                .symbolSize(16)
+                                .foregroundStyle(Theme.accentColor)
+                                .annotation(position: .overlay) {
+                                    Circle()
+                                        .strokeBorder(Theme.accentColor, lineWidth: 2)
+                                        .background(Circle().fill(Theme.accentColor.opacity(0.2)))
+                                        .frame(width: 16, height: 16)
+                                }
                             }
                         }
                     }
-                }
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: xAxisStrideComponent, count: xAxisStrideCount)) { value in
-                        AxisValueLabel {
-                            if let dateValue = value.as(Date.self) {
-                                Text(formattedAxisLabel(for: dateValue))
+                    .chartXAxis {
+                        AxisMarks(values: .stride(by: xAxisStrideComponent, count: xAxisStrideCount)) { value in
+                            AxisValueLabel {
+                                if let dateValue = value.as(Date.self) {
+                                    Text(formattedAxisLabel(for: dateValue))
+                                }
                             }
                         }
                     }
-                }
-                .chartOverlay { proxy in
-                    GeometryReader { geometry in
-                        Rectangle().fill(Color.clear).contentShape(Rectangle())
-                            .gesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { value in
-                                        let location = value.location
-                                        guard let date: Date = proxy.value(atX: location.x) else { return }
+                    .chartOverlay { proxy in
+                        GeometryReader { geometry in
+                            Rectangle().fill(Color.clear).contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onChanged { value in
+                                            let location = value.location
+                                            guard let date: Date = proxy.value(atX: location.x) else { return }
 
-                                        if let closestEntry = netWorthData.min(by: { abs($0.date.timeIntervalSince1970 - date.timeIntervalSince1970) < abs($1.date.timeIntervalSince1970 - date.timeIntervalSince1970) }),
-                                           let tooltipXPosition = proxy.position(forX: closestEntry.date),
-                                           let tooltipYPosition = proxy.position(forY: closestEntry.amount) {
+                                            if let closestEntry = netWorthData.min(by: { abs($0.date.timeIntervalSince1970 - date.timeIntervalSince1970) < abs($1.date.timeIntervalSince1970 - date.timeIntervalSince1970) }),
+                                               let tooltipXPosition = proxy.position(forX: closestEntry.date),
+                                               let tooltipYPosition = proxy.position(forY: closestEntry.amount) {
 
-                                            // Only trigger haptic feedback and update if the data point has changed
-                                            if closestEntry.date != selectedDataPoint?.date {
-                                                DispatchQueue.main.async {
-                                                    selectedDataPoint = closestEntry
-                                                    tooltipPosition = CGPoint(x: tooltipXPosition, y: tooltipYPosition - 70)
-                                                    showTooltip = true
+                                                // Only trigger haptic feedback and update if the data point has changed
+                                                if closestEntry.date != selectedDataPoint?.date {
+                                                    DispatchQueue.main.async {
+                                                        selectedDataPoint = closestEntry
+                                                        tooltipPosition = CGPoint(x: tooltipXPosition, y: tooltipYPosition - 70)
+                                                        showTooltip = true
+                                                    }
+                                                    // Haptic Feedback
+                                                    let impactLight = UIImpactFeedbackGenerator(style: .light)
+                                                    impactLight.impactOccurred()
                                                 }
-                                                // Haptic Feedback
-                                                let impactLight = UIImpactFeedbackGenerator(style: .light)
-                                                impactLight.impactOccurred()
                                             }
                                         }
-                                    }
-                                    .onEnded { _ in
-                                        DispatchQueue.main.async {
-                                            showTooltip = false
-                                            selectedDataPoint = nil
+                                        .onEnded { _ in
+                                            DispatchQueue.main.async {
+                                                showTooltip = false
+                                                selectedDataPoint = nil
+                                            }
                                         }
-                                    }
-                            )
-                    }
-                }
-                .frame(height: 250)
-                .padding()
-                .overlay(
-                    Group {
-                        if showTooltip, let dataPoint = selectedDataPoint {
-                            TooltipView(dataPoint: dataPoint)
-                                .position(
-                                    x: tooltipPosition.x,
-                                    y: tooltipPosition.y
                                 )
                         }
                     }
-                )
+                    .frame(height: 250)
+                    .padding()
+                    .overlay(
+                        Group {
+                            if showTooltip, let dataPoint = selectedDataPoint {
+                                TooltipView(dataPoint: dataPoint)
+                                    .position(
+                                        x: tooltipPosition.x,
+                                        y: tooltipPosition.y
+                                    )
+                            }
+                        }
+                    )
+                }
 
-                // Time Frame Selection Buttons
-                TimeFrameSelectionView(selectedTimeFrame: $selectedTimeFrame)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                // Total Net Worth Text in the upper left corner
+                VStack(alignment: .leading) {
+                    Text(netWorthText)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(Theme.textColor)
+                    if let changeText = netWorthChangeText {
+                        Text(changeText)
+                            .font(.subheadline)
+                            .foregroundColor(netWorthChangeColor)
+                    }
+                }
+                .padding(.leading, 16)
+                .padding(.top, 16)
             }
+
+            // Time Frame Selection Buttons
+            TimeFrameSelectionView(selectedTimeFrame: $selectedTimeFrame)
+                .padding(.horizontal)
+                .padding(.bottom, 8)
         }
         .background(Theme.cardColor)
         .cornerRadius(15)
@@ -273,6 +300,66 @@ struct NetWorthChartView: View {
             return date.formatted(.dateTime.weekday(.abbreviated))
         default:
             return date.formatted(.dateTime.year())
+        }
+    }
+
+    // Helper variables for net worth text and change
+    private var netWorthText: String {
+        let amount: Double
+        if let selectedDataPoint = selectedDataPoint {
+            amount = selectedDataPoint.amount
+        } else if let lastDataPoint = netWorthData.last {
+            amount = lastDataPoint.amount
+        } else {
+            amount = 0.0
+        }
+        return amount.formatted(.currency(code: "USD"))
+    }
+
+    private var netWorthChangeText: String? {
+        guard let firstDataPoint = netWorthData.first,
+              let lastDataPoint = netWorthData.last else {
+            return nil
+        }
+        let change: Double
+        if let selectedDataPoint = selectedDataPoint {
+            change = selectedDataPoint.amount - firstDataPoint.amount
+        } else {
+            change = lastDataPoint.amount - firstDataPoint.amount
+        }
+        let percentageChange = (change / firstDataPoint.amount) * 100
+        let arrow = change >= 0 ? "↑" : "↓"
+        return String(format: "%.2f%% %@", abs(percentageChange), arrow)
+    }
+
+    private var netWorthChangeColor: Color {
+        guard let firstDataPoint = netWorthData.first else {
+            return .gray
+        }
+        let currentAmount: Double
+        if let selectedDataPoint = selectedDataPoint {
+            currentAmount = selectedDataPoint.amount
+        } else if let lastDataPoint = netWorthData.last {
+            currentAmount = lastDataPoint.amount
+        } else {
+            return .gray
+        }
+        return currentAmount >= firstDataPoint.amount ? .green : .red
+    }
+
+    // Subtitle text based on selected time frame
+    private var subtitleText: String {
+        switch selectedTimeFrame {
+        case .allTime:
+            return "Since Creation"
+        case .pastThreeYears:
+            return "Over the Past 3 Years"
+        case .yearToDate:
+            return "Since the Start of This Year"
+        case .month:
+            return "Over This Month"
+        case .week:
+            return "Over the Past Week"
         }
     }
 }

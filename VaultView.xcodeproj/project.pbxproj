@@ -76,6 +76,7 @@
 				ContentView.swift,
 				Dashboard/AverageMonthlyChangeChartView.swift,
 				Dashboard/CurrentMonthChangeCardView.swift,
+				Dashboard/DashboardCardView.swift,
 				Dashboard/DashboardView.swift,
 				Dashboard/NetWorthChartView.swift,
 				Settings/AppIconPickerView.swift,
